@@ -3,19 +3,31 @@ import { z } from "zod";
 import { EnvError } from "./envError.js";
 
 /**
+ * Treats an empty string as "not set", so a variable's default still applies.
+ *
+ * Hosts inject blanks for variables they consider standard — Vercel supplies
+ * PORT="" to every function — and an empty string is not `undefined`, so zod
+ * skips the default and validates the blank instead. For PORT that meant
+ * coercion to 0, a failed `.positive()`, and a deployment refusing to boot
+ * over a variable nothing here even uses.
+ */
+const blankAsUnset = <T extends z.ZodTypeAny>(schema: T) =>
+  z.preprocess((value) => (value === "" ? undefined : value), schema);
+
+/**
  * Environment is validated once at boot. A missing or malformed value fails
  * loudly here rather than surfacing as a confusing runtime error later.
  */
 const schema = z.object({
-  NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
-  PORT: z.coerce.number().int().positive().default(4000),
+  NODE_ENV: blankAsUnset(z.enum(["development", "test", "production"]).default("development")),
+  PORT: blankAsUnset(z.coerce.number().int().positive().default(4000)),
 
   MONGODB_URI: z.string().min(1, "MONGODB_URI is required"),
 
   JWT_SECRET: z.string().min(32, "JWT_SECRET must be at least 32 characters"),
-  JWT_EXPIRES_IN: z.string().default("7d"),
+  JWT_EXPIRES_IN: blankAsUnset(z.string().default("7d")),
 
-  CORS_ORIGINS: z.string().default("http://localhost:3000"),
+  CORS_ORIGINS: blankAsUnset(z.string().default("http://localhost:3000")),
 
   REVALIDATE_URL: z.string().url().optional().or(z.literal("")),
   REVALIDATE_SECRET: z.string().optional().or(z.literal("")),

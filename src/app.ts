@@ -55,6 +55,12 @@ export function createApp() {
     }),
   );
 
+  // The root is not part of the API surface, but it is the first URL anyone
+  // opens. Answering here beats a 404 that reads like an outage.
+  app.get("/", (_req, res) => {
+    res.json({ name: "OptimalMD API", health: "/api/health" });
+  });
+
   app.use("/api", router);
 
   app.use(notFoundHandler);

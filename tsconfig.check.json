@@ -1,0 +1,11 @@
+{
+  // Type-checks the serverless entry too. It cannot live in the build config
+  // because `rootDir: src` must stay tight for the emitted output layout, and
+  // api/ sits outside it — Vercel compiles that file itself.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "rootDir": "."
+  },
+  "include": ["src/**/*.ts", "api/**/*.ts"]
+}

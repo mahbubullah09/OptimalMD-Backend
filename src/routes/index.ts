@@ -1,5 +1,5 @@
 import { Router } from "express";
-import rateLimit from "express-rate-limit";
+import { rateLimit } from "express-rate-limit";
 import { changePassword, login, me } from "../controllers/auth.controller.js";
 import {
   getPage,

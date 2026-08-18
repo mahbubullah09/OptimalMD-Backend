@@ -73,6 +73,40 @@ the three shard hosts directly. Switch back to the `+srv` form once DNS is
 fixed (setting the resolver to 1.1.1.1 or 8.8.8.8 is enough) — the shard
 hostnames can change, whereas the SRV record follows them automatically.
 
+## Deploying
+
+The app runs two ways from the same code:
+
+**A long-running server** (`npm start` -> `src/index.ts`). This is the natural
+fit: Render, Railway, Fly, a VM — anywhere that runs a process. Nothing extra
+is needed.
+
+**Serverless on Vercel** (`api/index.ts` + `vercel.json`). Vercel never runs
+`src/index.ts`, because there is no process to hold `app.listen()` open;
+instead every request invokes the handler in `api/`. Two consequences worth
+knowing:
+
+- The Mongoose connection is cached on `globalThis` (see `db/connect.ts`).
+  Without that, each cold start would open a connection and never close it and
+  Atlas would run out. Keep an eye on the cluster's connection count under
+  load, and consider Atlas's serverless tier or a pooler if it climbs.
+- Cold starts pay the connection cost — roughly 1.5s locally versus under a
+  millisecond once warm.
+
+If the API is mostly steady traffic rather than bursty, the long-running host
+is simpler and cheaper to reason about.
+
+### Type checking on deploy
+
+`vercel-build` runs `tsc --noCheck`: it emits JavaScript without type
+checking. Types are still checked by `npm run typecheck`, which covers
+`src/` **and** `api/` via `tsconfig.check.json`.
+
+This split exists because a host resolving types differently from a developer
+machine turns a green local build into a red deploy for reasons that have
+nothing to do with the code. Checking belongs in development and CI, where it
+is actionable; the deploy step only needs to compile.
+
 ## Security
 
 - `.env` is gitignored. Never commit credentials.

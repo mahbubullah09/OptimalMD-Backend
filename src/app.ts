@@ -1,6 +1,6 @@
 import cors from "cors";
 import express from "express";
-import rateLimit from "express-rate-limit";
+import { rateLimit } from "express-rate-limit";
 import helmet from "helmet";
 import morgan from "morgan";
 import { env } from "./config/env.js";

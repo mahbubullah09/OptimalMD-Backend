@@ -96,16 +96,27 @@ knowing:
 If the API is mostly steady traffic rather than bursty, the long-running host
 is simpler and cheaper to reason about.
 
-### Type checking on deploy
+### ESM packages with a default export
 
-`vercel-build` runs `tsc --noCheck`: it emits JavaScript without type
-checking. Types are still checked by `npm run typecheck`, which covers
-`src/` **and** `api/` via `tsconfig.check.json`.
+Vercel type-checks the project with its own compiler options, separately from
+whatever the build script runs — so `tsc --noCheck` in a build script does not
+suppress it. Under those options a default export from an ESM-only dependency
+can resolve to the module namespace, which is not callable, and the deploy
+fails on code that compiles cleanly everywhere else.
 
-This split exists because a host resolving types differently from a developer
-machine turns a green local build into a red deploy for reasons that have
-nothing to do with the code. Checking belongs in development and CI, where it
-is actionable; the deploy step only needs to compile.
+Anything imported as a default from a package with `"type": "module"` is at
+risk. The fix is to avoid depending on the default:
+
+- `express-rate-limit` -> `import { rateLimit }`
+- `bcryptjs` -> `import { compare, hash }`
+- `helmet` has no named equivalent, so `app.ts` reads `.default` off a
+  namespace import, which behaves the same under every interop setting.
+
+CJS dependencies (express, cors, morgan, mongoose, jsonwebtoken) are unaffected
+— `esModuleInterop` handles their `export =` form consistently.
+
+Type checking still runs locally via `npm run typecheck`, which covers `src/`
+**and** `api/` through `tsconfig.check.json`.
 
 ## Security
 

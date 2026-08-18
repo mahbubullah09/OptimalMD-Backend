@@ -9,8 +9,7 @@
     "start": "node dist/index.js",
     "typecheck": "tsc -p tsconfig.check.json",
     "seed:admin": "tsx src/scripts/seedAdmin.ts",
-    "seed:home": "tsx src/scripts/seedHome.ts",
-    "vercel-build": "tsc -p tsconfig.json --noCheck"
+    "seed:home": "tsx src/scripts/seedHome.ts"
   },
   "dependencies": {
     "bcryptjs": "^3.0.2",

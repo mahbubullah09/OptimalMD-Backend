@@ -1,11 +1,23 @@
 import cors from "cors";
-import express from "express";
+import express, { type RequestHandler } from "express";
 import { rateLimit } from "express-rate-limit";
-import helmet from "helmet";
+import * as helmetModule from "helmet";
 import morgan from "morgan";
 import { env } from "./config/env.js";
 import { errorHandler, notFoundHandler } from "./middleware/error.js";
 import { router } from "./routes/index.js";
+
+/**
+ * helmet exposes its middleware only as a default export, and hosts disagree
+ * about how that default should be handed back: Vercel's build type-checks
+ * with its own compiler options and resolved it to the module namespace,
+ * which is not callable, while the identical local build resolved it fine.
+ *
+ * Reading the default off the namespace works under every interop setting,
+ * because nothing here relies on the default import itself being callable.
+ */
+const helmet = ((helmetModule as { default?: unknown }).default ??
+  helmetModule) as () => RequestHandler;
 
 export function createApp() {
   const app = express();

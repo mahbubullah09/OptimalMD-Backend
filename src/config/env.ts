@@ -26,8 +26,13 @@ if (!parsed.success) {
   const issues = parsed.error.issues
     .map((i) => `  - ${i.path.join(".") || "(root)"}: ${i.message}`)
     .join("\n");
-  console.error(`Invalid environment configuration:\n${issues}\n\nSee .env.example.`);
-  process.exit(1);
+  const message = `Invalid environment configuration:\n${issues}\n\nSee .env.example.`;
+
+  // Throw rather than process.exit: on a serverless host, exiting kills the
+  // invocation with an opaque FUNCTION_INVOCATION_FAILED and nothing useful in
+  // the logs, whereas a thrown error surfaces this message.
+  console.error(message);
+  throw new Error(message);
 }
 
 const raw = parsed.data;

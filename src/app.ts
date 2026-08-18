@@ -32,7 +32,12 @@ export function createApp() {
       origin(origin, callback) {
         // Same-origin and server-to-server calls arrive with no Origin header.
         if (!origin || env.corsOrigins.includes(origin)) return callback(null, true);
-        callback(new Error(`Origin ${origin} is not allowed`));
+
+        // Refuse by withholding the headers, not by throwing: an unlisted
+        // origin is a policy decision, and throwing turns it into a 500 that
+        // looks like a server fault.
+        console.warn(`Blocked cross-origin request from ${origin}`);
+        callback(null, false);
       },
       credentials: true,
     }),

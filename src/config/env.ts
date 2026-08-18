@@ -1,5 +1,6 @@
 import "dotenv/config";
 import { z } from "zod";
+import { EnvError } from "./envError.js";
 
 /**
  * Environment is validated once at boot. A missing or malformed value fails
@@ -31,8 +32,14 @@ if (!parsed.success) {
   // Throw rather than process.exit: on a serverless host, exiting kills the
   // invocation with an opaque FUNCTION_INVOCATION_FAILED and nothing useful in
   // the logs, whereas a thrown error surfaces this message.
+  // Typed so the serverless entry point can turn this into a readable
+  // response: a deploy whose variables were never set should say so, rather
+  // than crashing before any handler exists.
   console.error(message);
-  throw new Error(message);
+  throw new EnvError(
+    [...new Set(parsed.error.issues.map((i) => String(i.path[0] ?? "(root)")))],
+    message,
+  );
 }
 
 const raw = parsed.data;

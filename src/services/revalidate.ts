@@ -8,8 +8,22 @@ import { env } from "../config/env.js";
  * caller surfaces the boolean so the admin UI can warn that the live page may
  * lag behind.
  */
+let warned = false;
+
 export async function revalidatePage(slug: string): Promise<boolean> {
-  if (!env.REVALIDATE_URL || !env.REVALIDATE_SECRET) return false;
+  if (!env.REVALIDATE_URL || !env.REVALIDATE_SECRET) {
+    // Said once, not per request: a missing setting here used to look
+    // identical to a successful no-op, which is how content ends up saved
+    // and invisible with nothing in the logs to explain it.
+    if (!warned) {
+      warned = true;
+      console.warn(
+        "Revalidation is disabled: set REVALIDATE_URL and REVALIDATE_SECRET " +
+          "to refresh the public site after a change.",
+      );
+    }
+    return false;
+  }
 
   try {
     const res = await fetch(env.REVALIDATE_URL, {

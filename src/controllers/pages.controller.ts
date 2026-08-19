@@ -56,7 +56,7 @@ const seoSchema = z.object({
   twitterCard: z.enum(TWITTER_CARDS).optional(),
   noindex: z.boolean().optional(),
   nofollow: z.boolean().optional(),
-  schema: schemaOrgSchema.optional(),
+  structuredData: schemaOrgSchema.optional(),
 });
 
 const sectionSchema = z.object({
@@ -107,7 +107,7 @@ export async function updatePage(req: Request, res: Response) {
       ...current,
       ...patch.seo,
       // Nested objects would otherwise be replaced wholesale by a partial patch.
-      schema: { ...current.schema, ...(patch.seo.schema ?? {}) },
+      structuredData: { ...current.structuredData, ...(patch.seo.structuredData ?? {}) },
     } as SeoAttrs;
 
     page.markModified("seo");

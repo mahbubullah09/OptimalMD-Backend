@@ -1,5 +1,5 @@
 import { compare, hash } from "bcryptjs";
-import { type HydratedDocument, model, Schema } from "mongoose";
+import { model, Schema } from "mongoose";
 
 /**
  * Roles are stored now but not yet enforced beyond "must be signed in".
@@ -45,8 +45,6 @@ const adminUserSchema = new Schema<AdminUserAttrs>(
     },
   },
 );
-
-export type AdminUserDoc = HydratedDocument<AdminUserAttrs>;
 
 export const AdminUser = model<AdminUserAttrs>("AdminUser", adminUserSchema);
 

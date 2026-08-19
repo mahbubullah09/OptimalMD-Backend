@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { rateLimit } from "express-rate-limit";
 import { changePassword, login, me } from "../controllers/auth.controller.js";
+import { getGlobals, updateGlobalsPart } from "../controllers/globals.controller.js";
 import {
   getPage,
   listPages,
@@ -36,3 +37,8 @@ router.get("/pages", asyncHandler(listPages));
 router.get("/pages/:slug", asyncHandler(getPage));
 router.put("/pages/:slug", requireAuth, asyncHandler(updatePage));
 router.patch("/pages/:slug/sections/:key", requireAuth, asyncHandler(updateSection));
+
+// ---- site-wide chrome ----
+// The navbar and footer are shared by every page, so they live outside /pages.
+router.get("/globals", asyncHandler(getGlobals));
+router.put("/globals/:part", requireAuth, asyncHandler(updateGlobalsPart));

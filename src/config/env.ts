@@ -64,4 +64,3 @@ export const env = {
     .filter(Boolean),
 };
 
-export type Env = typeof env;

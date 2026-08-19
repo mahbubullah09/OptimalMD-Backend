@@ -59,11 +59,3 @@ export async function requireAuth(req: Request, _res: Response, next: NextFuncti
   }
 }
 
-/** Role gate for later use; every current route only needs requireAuth. */
-export const requireRole =
-  (...roles: AdminRole[]) =>
-  (req: Request, _res: Response, next: NextFunction) => {
-    if (!req.auth) return next(ApiError.unauthorized());
-    if (!roles.includes(req.auth.role)) return next(ApiError.forbidden());
-    next();
-  };

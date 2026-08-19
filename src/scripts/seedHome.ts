@@ -405,7 +405,7 @@ async function main() {
       "$0 lab tests",
       "healthcare without insurance",
     ],
-    schema: {
+    structuredData: {
       organization: { enabled: true },
       webPage: { enabled: true, type: "WebPage" as const },
       faq: { enabled: false, items: [] },

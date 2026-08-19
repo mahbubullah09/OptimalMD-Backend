@@ -1,4 +1,4 @@
-import { type HydratedDocument, model, Schema, Types } from "mongoose";
+import { model, Schema, Types } from "mongoose";
 
 /**
  * A page is an ordered list of sections plus its SEO metadata.
@@ -68,7 +68,7 @@ export interface SeoAttrs {
   twitterCard: TwitterCard;
   noindex: boolean;
   nofollow: boolean;
-  schema: SchemaAttrs;
+  structuredData: SchemaAttrs;
 }
 
 export interface PageAttrs {
@@ -160,7 +160,14 @@ const seoSchema = new Schema<SeoAttrs>(
     twitterCard: { type: String, enum: TWITTER_CARDS, default: "summary_large_image" },
     noindex: { type: Boolean, default: false },
     nofollow: { type: Boolean, default: false },
-    schema: { type: schemaOrgSchema, default: () => ({}) },
+    /*
+     * Named structuredData, not schema: "schema" is a reserved Mongoose
+     * document property. As a path name it overwrites the subdocument's own
+     * .schema reference while defaults are being applied, after which the
+     * next array default reads undefined.indexedPaths() and validation
+     * fails with an error naming neither cause.
+     */
+    structuredData: { type: schemaOrgSchema, default: () => ({}) },
   },
   { _id: false },
 );
@@ -199,7 +206,5 @@ pageSchema.pre("save", function sortSections(next) {
   }
   next();
 });
-
-export type PageDoc = HydratedDocument<PageAttrs>;
 
 export const Page = model<PageAttrs>("Page", pageSchema);

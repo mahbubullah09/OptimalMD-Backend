@@ -10,7 +10,8 @@
     "typecheck": "tsc -p tsconfig.check.json",
     "seed:admin": "tsx src/scripts/seedAdmin.ts",
     "seed:home": "tsx src/scripts/seedHome.ts",
-    "env:vercel": "node scripts/vercel-env.mjs"
+    "env:vercel": "node scripts/vercel-env.mjs",
+    "migrate:seo-schema": "node scripts/rename-seo-schema.mjs"
   },
   "dependencies": {
     "bcryptjs": "^3.0.2",
